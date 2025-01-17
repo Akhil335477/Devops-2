@@ -1,42 +1,26 @@
-from flask import Flask, render_template, request, redirect
-import pymysql
+from flask import Flask, render_template, request
 
-app = Flask(__name__)
+app = Flask(_name_)
 
-# Database connection details
-DB_HOST = "database-1.cpyq2gyi86w0.us-east-1.rds.amazonaws.com"
-DB_USER = "admin"
-DB_PASSWORD = "WiKkm5X3sTcG1odYdAWF"
-DB_NAME = "database-1"
-
-# Connect to the database
-def get_db_connection():
-    return pymysql.connect(
-        host=DB_HOST,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        database=DB_NAME
-    )
+# Define your questions
+questions = [
+    {"question": "What is the name?"},
+    {"question": "What is your strengths?"},
+    {"question": "What are the skills?"}
+]
 
 @app.route('/')
 def index():
-    connection = get_db_connection()
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT name, skill FROM skills")
-        data = cursor.fetchall()
-    connection.close()
-    return render_template('index.html', data=data)
+    return render_template('index.html', questions=questions)
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    name = request.form['name']
-    skill = request.form['skill']
-    connection = get_db_connection()
-    with connection.cursor() as cursor:
-        cursor.execute("INSERT INTO skills (name, skill) VALUES (%s, %s)", (name, skill))
-        connection.commit()
-    connection.close()
-    return redirect('/')
+    score = 0
+    for i, q in enumerate(questions):
+        user_answer = request.form.get(f'question{i+1}')
+        if user_answer == q['answer']:
+            score += 1
+    return f'You got {score}/{len(questions)} correct.'
 
-if __name__ == '__main__':
+if _name_ == '_main_':
     app.run(host='0.0.0.0', port=5000)
